@@ -28,7 +28,7 @@ export default function NotificationsPage() {
                 <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary"><Bell className="h-4 w-4" /></div>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold">{n.title}</div>
-                  {n.body && <div className="text-sm text-muted-foreground">{n.body}</div>}
+                  {n.message && <div className="text-sm text-muted-foreground">{n.message}</div>}
                   <div className="mt-1 text-xs text-muted-foreground">{formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</div>
                 </div>
                 {!n.read && (

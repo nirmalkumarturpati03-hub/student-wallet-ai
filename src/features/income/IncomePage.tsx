@@ -20,15 +20,15 @@ export default function IncomePage() {
   const add = useAddIncome(user?.id);
   const del = useDeleteIncome(user?.id);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", amount: "", source: "Pocket Money", date: new Date().toISOString().slice(0, 10) });
+  const [form, setForm] = useState({ description: "", amount: "", source: "Pocket Money", date: new Date().toISOString().slice(0, 10) });
   const currency = profile?.currency ?? "INR";
   const total = incomes.reduce((s, i) => s + Number(i.amount), 0);
 
   const save = async () => {
-    if (!form.title || !form.amount) return toast.error("Fill all fields");
-    await add.mutateAsync({ title: form.title, amount: Number(form.amount), source: form.source, date: form.date });
+    if (!form.amount) return toast.error("Fill all fields");
+    await add.mutateAsync({ description: form.description || null, amount: Number(form.amount), source: form.source, date: form.date });
     toast.success("Income added");
-    setForm({ title: "", amount: "", source: "Pocket Money", date: new Date().toISOString().slice(0, 10) });
+    setForm({ description: "", amount: "", source: "Pocket Money", date: new Date().toISOString().slice(0, 10) });
     setOpen(false);
   };
 
@@ -67,7 +67,7 @@ export default function IncomePage() {
               <motion.li key={i.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.02 }} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30">
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-success/15 text-success"><TrendingUp className="h-4 w-4" /></div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{i.title}</div>
+                  <div className="truncate text-sm font-medium">{i.description || i.source}</div>
                   <div className="text-xs text-muted-foreground">{i.source} · {format(new Date(i.date), "d MMM yyyy")}</div>
                 </div>
                 <div className="text-sm font-bold text-success">+{formatMoney(Number(i.amount), currency)}</div>
@@ -82,7 +82,7 @@ export default function IncomePage() {
         <DialogContent className="glass-strong sm:max-w-md">
           <DialogHeader><DialogTitle>Add income</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Monthly pocket money" /></div>
+            <div><Label>Description (optional)</Label><Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Monthly pocket money" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Amount</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
               <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>

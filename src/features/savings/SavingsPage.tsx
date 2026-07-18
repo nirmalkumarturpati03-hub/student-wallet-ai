@@ -18,16 +18,16 @@ export default function SavingsPage() {
   const del = useDeleteGoal(user?.id);
   const upd = useUpdateGoal(user?.id);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", target_amount: "", target_date: "" });
+  const [form, setForm] = useState({ name: "", target_amount: "", deadline: "" });
   const currency = profile?.currency ?? "INR";
 
   const save = async () => {
     if (!form.name || !form.target_amount) return toast.error("Fill required fields");
     await add.mutateAsync({
       name: form.name, target_amount: Number(form.target_amount),
-      target_date: form.target_date || null, saved_amount: 0,
+      deadline: form.deadline || null, saved_amount: 0,
     });
-    setForm({ name: "", target_amount: "", target_date: "" });
+    setForm({ name: "", target_amount: "", deadline: "" });
     setOpen(false);
     toast.success("Goal created");
   };
@@ -69,7 +69,7 @@ export default function SavingsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-semibold">{g.name}</h3>
-                    {g.target_date && <p className="text-xs text-muted-foreground">By {new Date(g.target_date).toLocaleDateString()}</p>}
+                    {g.deadline && <p className="text-xs text-muted-foreground">By {new Date(g.deadline).toLocaleDateString()}</p>}
                   </div>
                   <button onClick={async () => { await del.mutateAsync(g.id); toast.success("Removed"); }} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </div>
@@ -101,7 +101,7 @@ export default function SavingsPage() {
             <div><Label>Goal name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="New laptop" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Target amount</Label><Input type="number" value={form.target_amount} onChange={(e) => setForm({ ...form, target_amount: e.target.value })} /></div>
-              <div><Label>Target date</Label><Input type="date" value={form.target_date} onChange={(e) => setForm({ ...form, target_date: e.target.value })} /></div>
+              <div><Label>Deadline</Label><Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} /></div>
             </div>
           </div>
           <DialogFooter>

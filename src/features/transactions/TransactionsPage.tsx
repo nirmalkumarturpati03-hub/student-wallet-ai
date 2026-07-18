@@ -22,7 +22,7 @@ export default function TransactionsPage() {
   const items = useMemo<Item[]>(() => {
     const list: Item[] = [];
     expenses.forEach((e) => list.push({ id: e.id, kind: "expense", title: e.title, amount: Number(e.amount), date: e.date, meta: e.category }));
-    incomes.forEach((i) => list.push({ id: i.id, kind: "income", title: i.title, amount: Number(i.amount), date: i.date, meta: i.source }));
+    incomes.forEach((i) => list.push({ id: i.id, kind: "income", title: i.description || i.source, amount: Number(i.amount), date: i.date, meta: i.source }));
     return list.sort((a, b) => (a.date < b.date ? 1 : -1));
   }, [expenses, incomes]);
 

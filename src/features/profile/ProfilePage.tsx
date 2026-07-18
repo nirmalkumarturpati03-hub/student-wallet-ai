@@ -11,14 +11,14 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id);
   const upd = useUpdateProfile(user?.id);
-  const [form, setForm] = useState({ full_name: "", college: "", course: "", year_of_study: "" });
+  const [form, setForm] = useState({ full_name: "", college: "", department: "", semester: "" });
 
   useEffect(() => {
     if (profile) setForm({
       full_name: profile.full_name ?? "",
       college: profile.college ?? "",
-      course: profile.course ?? "",
-      year_of_study: profile.year_of_study ? String(profile.year_of_study) : "",
+      department: profile.department ?? "",
+      semester: profile.semester ?? "",
     });
   }, [profile]);
 
@@ -26,8 +26,8 @@ export default function ProfilePage() {
     await upd.mutateAsync({
       full_name: form.full_name || null,
       college: form.college || null,
-      course: form.course || null,
-      year_of_study: form.year_of_study ? Number(form.year_of_study) : null,
+      department: form.department || null,
+      semester: form.semester || null,
     });
     toast.success("Profile updated");
   };
@@ -50,8 +50,8 @@ export default function ProfilePage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <div><Label>Full name</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
           <div><Label>College</Label><Input value={form.college} onChange={(e) => setForm({ ...form, college: e.target.value })} placeholder="IIT Bombay" /></div>
-          <div><Label>Course</Label><Input value={form.course} onChange={(e) => setForm({ ...form, course: e.target.value })} placeholder="B.Tech CSE" /></div>
-          <div><Label>Year of study</Label><Input type="number" min={1} max={6} value={form.year_of_study} onChange={(e) => setForm({ ...form, year_of_study: e.target.value })} /></div>
+          <div><Label>Department</Label><Input value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} placeholder="Computer Science" /></div>
+          <div><Label>Semester</Label><Input value={form.semester} onChange={(e) => setForm({ ...form, semester: e.target.value })} placeholder="Sem 5" /></div>
         </div>
         <Button onClick={save} className="mt-4 gradient-primary text-primary-foreground">Save changes</Button>
       </div>
