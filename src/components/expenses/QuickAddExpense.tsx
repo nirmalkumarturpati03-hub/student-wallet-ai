@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 const schema = z.object({
   title: z.string().trim().min(1, "Required").max(120),
-  amount: z.coerce.number().positive("Must be > 0"),
+  amount: z.number().positive("Must be > 0"),
   category: z.string().min(1),
   date: z.string().min(1),
   payment_method: z.string().optional(),
@@ -59,7 +59,7 @@ export default function QuickAddExpense({ open, onOpenChange }: { open: boolean;
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="amount">Amount</Label>
-              <Input id="amount" type="number" step="0.01" {...register("amount")} placeholder="0" />
+              <Input id="amount" type="number" step="0.01" {...register("amount", { valueAsNumber: true })} placeholder="0" />
               {errors.amount && <p className="mt-1 text-xs text-destructive">{errors.amount.message}</p>}
             </div>
             <div>
