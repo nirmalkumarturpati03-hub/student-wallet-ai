@@ -95,6 +95,17 @@ export function useAddIncome(userId?: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["incomes", userId] }),
   });
 }
+export function useUpdateIncome(userId?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: TablesUpdate<"incomes"> }) => {
+      const { data, error } = await supabase.from("incomes").update(patch).eq("id", id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["incomes", userId] }),
+  });
+}
 export function useDeleteIncome(userId?: string) {
   const qc = useQueryClient();
   return useMutation({
