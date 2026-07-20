@@ -2,13 +2,14 @@ import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useExpenses, useIncomes, useProfile } from "@/hooks/useFinance";
 import { formatMoney } from "@/lib/currency";
-import { getCategoryMeta } from "@/lib/categories";
+import { getCategoryMeta, EXPENSE_CATEGORIES } from "@/lib/categories";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowDownRight, ArrowUpRight, Search } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Search, Filter, ArrowUpDown } from "lucide-react";
+import { inRange, matchesQuery, sortItems, type DateRange, type SortMode } from "@/lib/filters";
 
-type Item = { id: string; kind: "income" | "expense"; title: string; amount: number; date: string; meta: string };
+type Item = { id: string; kind: "income" | "expense"; title: string; amount: number; date: string; meta: string; description: string | null };
 
 export default function TransactionsPage() {
   const { user } = useAuth();
@@ -16,17 +17,30 @@ export default function TransactionsPage() {
   const { data: expenses = [] } = useExpenses(user?.id);
   const { data: incomes = [] } = useIncomes(user?.id);
   const [q, setQ] = useState("");
-  const [kind, setKind] = useState<string>("all");
+  const [kind, setKind] = useState("all");
+  const [cat, setCat] = useState("all");
+  const [range, setRange] = useState<DateRange>("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sort, setSort] = useState<SortMode>("newest");
   const currency = profile?.currency ?? "INR";
 
   const items = useMemo<Item[]>(() => {
     const list: Item[] = [];
-    expenses.forEach((e) => list.push({ id: e.id, kind: "expense", title: e.title, amount: Number(e.amount), date: e.date, meta: e.category }));
-    incomes.forEach((i) => list.push({ id: i.id, kind: "income", title: i.description || i.source, amount: Number(i.amount), date: i.date, meta: i.source }));
-    return list.sort((a, b) => (a.date < b.date ? 1 : -1));
+    expenses.forEach((e) => list.push({ id: e.id, kind: "expense", title: e.title, amount: Number(e.amount), date: e.date, meta: e.category, description: e.description }));
+    incomes.forEach((i) => list.push({ id: i.id, kind: "income", title: i.description || i.source, amount: Number(i.amount), date: i.date, meta: i.source, description: i.description }));
+    return list;
   }, [expenses, incomes]);
 
-  const filtered = items.filter((it) => (kind === "all" || it.kind === kind) && (!q || it.title.toLowerCase().includes(q.toLowerCase())));
+  const filtered = useMemo(() => {
+    const f = items.filter((it) =>
+      (kind === "all" || it.kind === kind) &&
+      (cat === "all" || it.meta === cat) &&
+      inRange(it.date, range, from, to) &&
+      matchesQuery(q, it.title, it.description, it.meta, it.amount, it.date),
+    );
+    return sortItems(f, sort);
+  }, [items, q, kind, cat, range, from, to, sort]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -36,20 +50,52 @@ export default function TransactionsPage() {
       </div>
 
       <div className="glass rounded-2xl p-4">
-        <div className="grid gap-3 md:grid-cols-[1fr_200px]">
+        <div className="grid gap-3 md:grid-cols-[1fr_150px_180px_180px_180px]">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search..." value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+            <Input placeholder="Search title, category, amount…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
           </div>
           <Select value={kind} onValueChange={setKind}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="income">Income only</SelectItem>
-              <SelectItem value="expense">Expense only</SelectItem>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={cat} onValueChange={setCat}>
+            <SelectTrigger><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Category" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All categories</SelectItem>
+              {EXPENSE_CATEGORIES.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={range} onValueChange={(v) => setRange(v as DateRange)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All time</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This week</SelectItem>
+              <SelectItem value="month">This month</SelectItem>
+              <SelectItem value="custom">Custom range</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortMode)}>
+            <SelectTrigger><ArrowUpDown className="mr-2 h-4 w-4" /><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+              <SelectItem value="highest">Highest amount</SelectItem>
+              <SelectItem value="lowest">Lowest amount</SelectItem>
             </SelectContent>
           </Select>
         </div>
+        {range === "custom" && (
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div><label className="text-xs text-muted-foreground">From</label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
+            <div><label className="text-xs text-muted-foreground">To</label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
+          </div>
+        )}
       </div>
 
       <div className="glass rounded-2xl">

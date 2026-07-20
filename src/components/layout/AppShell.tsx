@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeFinance } from "@/hooks/useRealtimeFinance";
 import Topbar from "./Topbar";
 
 const NAV = [
@@ -30,6 +32,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { user } = useAuth();
+  useRealtimeFinance(user?.id);
 
   const handleSignOut = async () => {
     await qc.cancelQueries();
