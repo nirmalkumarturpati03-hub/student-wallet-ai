@@ -16,7 +16,7 @@ export default function SavingsPage() {
   const { data: goals = [] } = useGoals(user?.id);
   const add = useAddGoal(user?.id);
   const del = useDeleteGoal(user?.id);
-  const upd = useUpdateGoal(user?.id);
+  const contrib = useContributeGoal(user?.id);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", target_amount: "", deadline: "" });
   const currency = profile?.currency ?? "INR";
