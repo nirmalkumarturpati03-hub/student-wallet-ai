@@ -32,8 +32,8 @@ export default function SavingsPage() {
     toast.success("Goal created");
   };
 
-  const addSavings = async (id: string, current: number, amt: number) => {
-    await upd.mutateAsync({ id, patch: { saved_amount: current + amt } });
+  const addSavings = async (id: string, _current: number, amt: number) => {
+    await contrib.mutateAsync({ goalId: id, amount: amt });
     toast.success(`+${formatMoney(amt, currency)} saved`);
   };
 
