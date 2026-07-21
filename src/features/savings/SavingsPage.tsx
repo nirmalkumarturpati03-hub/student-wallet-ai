@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Target, Plus, Trash2, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useGoals, useAddGoal, useDeleteGoal, useUpdateGoal, useProfile } from "@/hooks/useFinance";
+import { useGoals, useAddGoal, useDeleteGoal, useContributeGoal, useProfile } from "@/hooks/useFinance";
 import { formatMoney } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
