@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Target, Plus, Trash2, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useGoals, useAddGoal, useDeleteGoal, useUpdateGoal, useProfile } from "@/hooks/useFinance";
+import { useGoals, useAddGoal, useDeleteGoal, useContributeGoal, useProfile } from "@/hooks/useFinance";
 import { formatMoney } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ export default function SavingsPage() {
   const { data: goals = [] } = useGoals(user?.id);
   const add = useAddGoal(user?.id);
   const del = useDeleteGoal(user?.id);
-  const upd = useUpdateGoal(user?.id);
+  const contrib = useContributeGoal(user?.id);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", target_amount: "", deadline: "" });
   const currency = profile?.currency ?? "INR";
@@ -32,8 +32,8 @@ export default function SavingsPage() {
     toast.success("Goal created");
   };
 
-  const addSavings = async (id: string, current: number, amt: number) => {
-    await upd.mutateAsync({ id, patch: { saved_amount: current + amt } });
+  const addSavings = async (id: string, _current: number, amt: number) => {
+    await contrib.mutateAsync({ goalId: id, amount: amt });
     toast.success(`+${formatMoney(amt, currency)} saved`);
   };
 

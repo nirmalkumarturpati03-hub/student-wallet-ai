@@ -239,3 +239,62 @@ export function useAddNotification(userId?: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", userId] }),
   });
 }
+export function useDeleteNotification(userId?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("notifications").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", userId] }),
+  });
+}
+export function useMarkAllNotifsRead(userId?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("notifications").update({ read: true }).eq("user_id", userId!).eq("read", false);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", userId] }),
+  });
+}
+
+// ---------- Goal Contributions ----------
+export function useGoalTransactions(userId?: string, goalId?: string) {
+  return useQuery({
+    queryKey: ["goal_transactions", userId, goalId],
+    enabled: !!userId,
+    queryFn: async () => {
+      let q = supabase.from("goal_transactions").select("*").eq("user_id", userId!).order("created_at", { ascending: false });
+      if (goalId) q = q.eq("goal_id", goalId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as Tables<"goal_transactions">[];
+    },
+  });
+}
+export function useContributeGoal(userId?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ goalId, amount, note }: { goalId: string; amount: number; note?: string }) => {
+      // Fetch current saved amount
+      const { data: goal, error: gErr } = await supabase
+        .from("savings_goals").select("saved_amount, target_amount").eq("id", goalId).single();
+      if (gErr) throw gErr;
+      const newSaved = Number(goal.saved_amount) + amount;
+      const { error: uErr } = await supabase
+        .from("savings_goals").update({ saved_amount: newSaved }).eq("id", goalId);
+      if (uErr) throw uErr;
+      const { error: tErr } = await supabase
+        .from("goal_transactions").insert({ user_id: userId!, goal_id: goalId, amount, note: note ?? null });
+      if (tErr) throw tErr;
+      return { newSaved, target: Number(goal.target_amount) };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["goals", userId] });
+      qc.invalidateQueries({ queryKey: ["goal_transactions", userId] });
+      qc.invalidateQueries({ queryKey: ["notifications", userId] });
+    },
+  });
+}
