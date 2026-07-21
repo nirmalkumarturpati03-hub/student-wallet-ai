@@ -122,6 +122,41 @@ export type Database = {
         }
         Relationships: []
       }
+      goal_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          goal_id: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          goal_id: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          goal_id?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_transactions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       incomes: {
         Row: {
           amount: number
@@ -247,8 +282,11 @@ export type Database = {
           completed: boolean | null
           created_at: string
           deadline: string | null
+          description: string | null
           id: string
+          image_url: string | null
           name: string
+          priority: string | null
           saved_amount: number
           target_amount: number
           updated_at: string
@@ -258,8 +296,11 @@ export type Database = {
           completed?: boolean | null
           created_at?: string
           deadline?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
           name: string
+          priority?: string | null
           saved_amount?: number
           target_amount: number
           updated_at?: string
@@ -269,8 +310,11 @@ export type Database = {
           completed?: boolean | null
           created_at?: string
           deadline?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
           name?: string
+          priority?: string | null
           saved_amount?: number
           target_amount?: number
           updated_at?: string
@@ -283,10 +327,13 @@ export type Database = {
           amount: number
           category: string | null
           created_at: string
+          description: string | null
           due_date: string
           id: string
           name: string
           paid: boolean | null
+          reminder_date: string | null
+          repeat_option: string | null
           updated_at: string
           user_id: string
         }
@@ -294,10 +341,13 @@ export type Database = {
           amount: number
           category?: string | null
           created_at?: string
+          description?: string | null
           due_date: string
           id?: string
           name: string
           paid?: boolean | null
+          reminder_date?: string | null
+          repeat_option?: string | null
           updated_at?: string
           user_id: string
         }
@@ -305,10 +355,13 @@ export type Database = {
           amount?: number
           category?: string | null
           created_at?: string
+          description?: string | null
           due_date?: string
           id?: string
           name?: string
           paid?: boolean | null
+          reminder_date?: string | null
+          repeat_option?: string | null
           updated_at?: string
           user_id?: string
         }
